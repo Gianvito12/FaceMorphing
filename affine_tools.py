@@ -4,7 +4,7 @@ import dlib
 
 def resizer(im1,im2):
     area1=im1.shape[0]*im1.shape[1]
-    area2=im1.shape[0]*im2.shape[1]
+    area2=im2.shape[0]*im2.shape[1]
     if area1<area2:
         im2=cv2.resize(im2,(im1.shape[1],im1.shape[0]),interpolation=cv2.INTER_LINEAR)
     elif area1>area2:
