@@ -14,10 +14,11 @@ def resizer(im1,im2):
 def aligner(im1, im2):
     # Carica il classificatore Haar per il rilevamento dei volti
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt.xml')
-    
+    gray_img1=cv2.cvtColor(im1,cv2.COLOR_BGR2GRAY)
+    gray_img2=cv2.cvtColor(im2,cv2.COLOR_BGR2GRAY)
     # Rileva i volti in entrambe le immagini
-    faces1 = face_cascade.detectMultiScale(im1, scaleFactor=1.1, minNeighbors=9)
-    faces2 = face_cascade.detectMultiScale(im2, scaleFactor=1.1, minNeighbors=9)
+    faces1 = face_cascade.detectMultiScale(gray_img1, scaleFactor=1.1, minNeighbors=9)
+    faces2 = face_cascade.detectMultiScale(gray_img2, scaleFactor=1.1, minNeighbors=9)
     
     if len(faces1) == 0 or len(faces2) == 0:
         print("Errore: non sono stati rilevati volti in una delle immagini.")
@@ -75,7 +76,7 @@ def get_landmarks(img):
     detector = dlib.get_frontal_face_detector()
     
     # Rileva i volti nell'immagine
-    faces = detector(img, 0)
+    faces = detector(img, 1)
     
     # Ottieni la shape dell'immagine
     height, width = img.shape[:2]
@@ -190,7 +191,11 @@ def warping(landmark_points, intermediate_landmarks, index_triangles, image):
         mask = np.zeros(image.shape[:2])
         warp_matrix = cv2.getAffineTransform(source_triangle, destination_triangle)
         full_warp_matrix = np.vstack((warp_matrix, [0, 0, 1]))
-        inverse_matrix = np.linalg.inv(full_warp_matrix)
+
+        try:
+            inverse_matrix = np.linalg.inv(full_warp_matrix)
+        except np.linalg.LinAlgError:
+            continue
 
         # Riempie il triangolo di destinazione nella maschera
         cv2.fillConvexPoly(mask, np.int32(destination_triangle), 255)
